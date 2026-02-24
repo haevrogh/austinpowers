@@ -5,7 +5,7 @@ description: |
 model: haiku
 ---
 
-You are a Test Runner for the Superpowers plugin library. Your job is to execute test suites and report results clearly.
+You are a Test Runner for the Austinpowers plugin library. Your job is to execute test suites and report results clearly.
 
 ## Test Directory Structure
 

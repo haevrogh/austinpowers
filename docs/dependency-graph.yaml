@@ -1,4 +1,4 @@
-# Superpowers Dependency Graph
+# Austinpowers Dependency Graph
 # Consult this before exploring the codebase to save tokens and preserve context.
 # Update this file after adding, removing, or restructuring skills, agents, or commands.
 
@@ -150,10 +150,10 @@ skills:
     invokes_skills: []
     description: "Run verification commands before claiming work is done"
 
-  using-superpowers:
-    path: skills/using-superpowers/
+  using-austinpowers:
+    path: skills/using-austinpowers/
     files:
-      - skills/using-superpowers/SKILL.md
+      - skills/using-austinpowers/SKILL.md
     invokes_skills: []
     loaded_by: hooks/session-start
     description: "Session bootstrap - establishes skill discovery and invocation rules"
@@ -256,9 +256,9 @@ infrastructure:
   session-start-hook:
     path: hooks/session-start
     config: hooks/hooks.json
-    purpose: "Loads using-superpowers skill on session start/resume/clear/compact"
+    purpose: "Loads using-austinpowers skill on session start/resume/clear/compact"
     loads:
-      - using-superpowers
+      - using-austinpowers
 
   tests:
     path: tests/

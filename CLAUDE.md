@@ -1,4 +1,4 @@
-# Superpowers
+# Austinpowers
 
 Skills library for Claude Code (v4.3.1, MIT, by Jesse Vincent). Provides 14 development skills, agents, 3 commands, session-start hooks, and `lib/skills-core.js` for skill discovery.
 
@@ -7,7 +7,7 @@ Skills library for Claude Code (v4.3.1, MIT, by Jesse Vincent). Provides 14 deve
 - `skills/` - Each subdirectory contains `SKILL.md` with YAML frontmatter (`name`, `description`) + markdown body
 - `agents/` - Agent definitions with YAML frontmatter (`name`, `description`, `model`) + markdown body
 - `commands/` - Slash commands that proxy to skills
-- `hooks/` - Session lifecycle hooks (`session-start` loads `using-superpowers`)
+- `hooks/` - Session lifecycle hooks (`session-start` loads `using-austinpowers`)
 - `lib/skills-core.js` - Skill discovery, frontmatter parsing, path resolution
 - `tests/` - Test suites organized by feature
 
