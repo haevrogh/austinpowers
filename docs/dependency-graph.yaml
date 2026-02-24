@@ -1,0 +1,270 @@
+# Superpowers Dependency Graph
+# Consult this before exploring the codebase to save tokens and preserve context.
+# Update this file after adding, removing, or restructuring skills, agents, or commands.
+
+version: "4.3.1"
+
+# ─── Skill Workflow Pipeline ───────────────────────────────────────────────────
+# How skills chain together during a typical development session.
+#
+#   brainstorming → writing-plans → subagent-driven-development → finishing-a-development-branch
+#                                 → executing-plans             → finishing-a-development-branch
+#
+#   requesting-code-review → (dispatches code-reviewer agent) → receiving-code-review
+#
+#   test-driven-development ↔ systematic-debugging  (used together during implementation)
+#   verification-before-completion (final gate before any completion claim)
+
+workflows:
+  plan-and-build:
+    description: "Full feature development lifecycle"
+    sequence:
+      - brainstorming
+      - writing-plans
+      - subagent-driven-development  # OR executing-plans
+      - requesting-code-review
+      - finishing-a-development-branch
+
+  code-review:
+    description: "Review cycle"
+    sequence:
+      - requesting-code-review  # dispatches code-reviewer agent
+      - receiving-code-review   # handling review feedback
+
+  implementation:
+    description: "Skills used during active coding"
+    members:
+      - test-driven-development
+      - systematic-debugging
+      - dispatching-parallel-agents
+      - verification-before-completion
+
+# ─── Skills ────────────────────────────────────────────────────────────────────
+
+skills:
+  brainstorming:
+    path: skills/brainstorming/
+    files:
+      - skills/brainstorming/SKILL.md
+    invokes_skills: []
+    invoked_by:
+      - commands/brainstorm.md
+    description: "Collaborative design exploration before implementation"
+
+  writing-plans:
+    path: skills/writing-plans/
+    files:
+      - skills/writing-plans/SKILL.md
+    invokes_skills: []
+    invoked_by:
+      - commands/write-plan.md
+    follows: brainstorming
+    description: "Create detailed implementation plans with bite-sized tasks"
+
+  executing-plans:
+    path: skills/executing-plans/
+    files:
+      - skills/executing-plans/SKILL.md
+    invokes_skills:
+      - requesting-code-review
+    invoked_by:
+      - commands/execute-plan.md
+    follows: writing-plans
+    description: "Execute plans in batches with review checkpoints"
+
+  subagent-driven-development:
+    path: skills/subagent-driven-development/
+    files:
+      - skills/subagent-driven-development/SKILL.md
+      - skills/subagent-driven-development/implementer-prompt.md
+      - skills/subagent-driven-development/spec-reviewer-prompt.md
+      - skills/subagent-driven-development/code-quality-reviewer-prompt.md
+    invokes_skills:
+      - requesting-code-review
+    invokes_agents:
+      - code-reviewer  # used in code quality review stage
+    follows: writing-plans
+    description: "Dispatch fresh subagent per task with two-stage review"
+
+  finishing-a-development-branch:
+    path: skills/finishing-a-development-branch/
+    files:
+      - skills/finishing-a-development-branch/SKILL.md
+    invokes_skills:
+      - verification-before-completion
+    follows:
+      - executing-plans
+      - subagent-driven-development
+    description: "Guide branch completion - merge, PR, or cleanup"
+
+  requesting-code-review:
+    path: skills/requesting-code-review/
+    files:
+      - skills/requesting-code-review/SKILL.md
+      - skills/requesting-code-review/code-reviewer.md
+    invokes_agents:
+      - code-reviewer
+    description: "Dispatch code-reviewer agent to catch issues"
+
+  receiving-code-review:
+    path: skills/receiving-code-review/
+    files:
+      - skills/receiving-code-review/SKILL.md
+    follows: requesting-code-review
+    description: "Technical evaluation of review feedback"
+
+  test-driven-development:
+    path: skills/test-driven-development/
+    files:
+      - skills/test-driven-development/SKILL.md
+      - skills/test-driven-development/testing-anti-patterns.md
+    invokes_skills: []
+    description: "RED-GREEN-REFACTOR cycle for all implementation"
+
+  systematic-debugging:
+    path: skills/systematic-debugging/
+    files:
+      - skills/systematic-debugging/SKILL.md
+      - skills/systematic-debugging/root-cause-tracing.md
+      - skills/systematic-debugging/condition-based-waiting.md
+      - skills/systematic-debugging/defense-in-depth.md
+      - skills/systematic-debugging/CREATION-LOG.md
+      - skills/systematic-debugging/test-academic.md
+      - skills/systematic-debugging/test-pressure-1.md
+      - skills/systematic-debugging/test-pressure-2.md
+      - skills/systematic-debugging/test-pressure-3.md
+    invokes_skills: []
+    description: "Structured root-cause analysis before proposing fixes"
+
+  dispatching-parallel-agents:
+    path: skills/dispatching-parallel-agents/
+    files:
+      - skills/dispatching-parallel-agents/SKILL.md
+    invokes_skills: []
+    description: "Parallelize 2+ independent tasks via subagents"
+
+  verification-before-completion:
+    path: skills/verification-before-completion/
+    files:
+      - skills/verification-before-completion/SKILL.md
+    invokes_skills: []
+    description: "Run verification commands before claiming work is done"
+
+  using-superpowers:
+    path: skills/using-superpowers/
+    files:
+      - skills/using-superpowers/SKILL.md
+    invokes_skills: []
+    loaded_by: hooks/session-start
+    description: "Session bootstrap - establishes skill discovery and invocation rules"
+
+  using-git-worktrees:
+    path: skills/using-git-worktrees/
+    files:
+      - skills/using-git-worktrees/SKILL.md
+    invokes_skills: []
+    description: "Create isolated git worktrees for feature work"
+
+  writing-skills:
+    path: skills/writing-skills/
+    files:
+      - skills/writing-skills/SKILL.md
+      - skills/writing-skills/anthropic-best-practices.md
+      - skills/writing-skills/persuasion-principles.md
+      - skills/writing-skills/testing-skills-with-subagents.md
+      - skills/writing-skills/render-graphs.js
+      - skills/writing-skills/examples/CLAUDE_MD_TESTING.md
+    invokes_skills:
+      - test-driven-development
+    description: "TDD methodology applied to skill creation"
+
+# ─── Agents ────────────────────────────────────────────────────────────────────
+
+agents:
+  code-reviewer:
+    path: agents/code-reviewer.md
+    model: inherit
+    used_by_skills:
+      - requesting-code-review
+      - subagent-driven-development
+    description: "Senior code reviewer - plan alignment, quality, architecture"
+
+  skill-developer:
+    path: agents/skill-developer.md
+    model: inherit
+    uses_skills:
+      - writing-skills
+      - test-driven-development
+    reads:
+      - docs/dependency-graph.yaml
+    description: "Create/modify skills using TDD methodology"
+
+  test-runner:
+    path: agents/test-runner.md
+    model: haiku
+    reads:
+      - tests/
+    description: "Execute test suites and report results"
+
+  skill-auditor:
+    path: agents/skill-auditor.md
+    model: haiku
+    reads:
+      - skills/
+      - docs/dependency-graph.yaml
+    description: "Audit skill quality against conventions"
+
+# ─── Commands ──────────────────────────────────────────────────────────────────
+
+commands:
+  brainstorm:
+    path: commands/brainstorm.md
+    proxies_to: brainstorming
+    description: "Slash command that invokes the brainstorming skill"
+
+  write-plan:
+    path: commands/write-plan.md
+    proxies_to: writing-plans
+    description: "Slash command that invokes the writing-plans skill"
+
+  execute-plan:
+    path: commands/execute-plan.md
+    proxies_to: executing-plans
+    description: "Slash command that invokes the executing-plans skill"
+
+# ─── Infrastructure ───────────────────────────────────────────────────────────
+
+infrastructure:
+  plugin-manifest:
+    path: .claude-plugin/plugin.json
+    purpose: "Plugin metadata - auto-discovers skills/ agents/ commands/"
+    references:
+      - skills/
+      - agents/
+      - commands/
+
+  skills-core:
+    path: lib/skills-core.js
+    purpose: "Skill discovery, frontmatter parsing, path resolution, update checking"
+    exports:
+      - extractFrontmatter
+      - findSkillsInDir
+      - resolveSkillPath
+      - checkForUpdates
+      - stripFrontmatter
+
+  session-start-hook:
+    path: hooks/session-start
+    config: hooks/hooks.json
+    purpose: "Loads using-superpowers skill on session start/resume/clear/compact"
+    loads:
+      - using-superpowers
+
+  tests:
+    path: tests/
+    directories:
+      - tests/claude-code/
+      - tests/skill-triggering/
+      - tests/explicit-skill-requests/
+      - tests/subagent-driven-dev/
+      - tests/opencode/
